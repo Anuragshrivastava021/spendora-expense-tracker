@@ -187,5 +187,8 @@ sleep while idle, and Render's free PostgreSQL databases expire after 30 days,
 so this setup is unsuitable for important or long-term financial records. No
 local database records are copied. The generated `SESSION_SECRET` is managed by
 Render, and the idempotent database schema migration runs before the web server
-starts. SMTP and administrator setup remain separate; do not add passwords or
-database URLs to the repository.
+starts. Render's PostgreSQL endpoint uses a self-signed TLS certificate, so the
+Blueprint explicitly disables certificate verification while retaining TLS
+encryption; other deployments keep certificate verification enabled by default.
+SMTP and administrator setup remain separate; do not add passwords or database
+URLs to the repository.

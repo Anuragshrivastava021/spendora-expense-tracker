@@ -14,6 +14,7 @@ export const config = {
   sessionSecret: process.env.SESSION_SECRET,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   production: process.env.NODE_ENV === 'production',
+  databaseSslRejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
   smtp: {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
