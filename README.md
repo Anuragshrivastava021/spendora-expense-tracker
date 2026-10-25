@@ -186,5 +186,6 @@ before creating resources. The preview selects free plans: the web service may
 sleep while idle, and Render's free PostgreSQL databases expire after 30 days,
 so this setup is unsuitable for important or long-term financial records. No
 local database records are copied. The generated `SESSION_SECRET` is managed by
-Render. SMTP and administrator setup remain separate; do not add passwords or
+Render, and the idempotent database schema migration runs before the web server
+starts. SMTP and administrator setup remain separate; do not add passwords or
 database URLs to the repository.
