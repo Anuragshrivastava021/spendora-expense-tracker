@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes } from 'node:crypto';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import nodemailer from 'nodemailer';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
@@ -16,7 +18,15 @@ import {
 
 export const app = express();
 app.disable('x-powered-by');
-app.use(helmet());
+if (config.production) app.set('trust proxy', 1);
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+    },
+  },
+}));
 app.use(cookieParser());
 app.use(express.json({ limit: '32kb' }));
 app.use((req, res, next) => {
@@ -27,7 +37,8 @@ app.use((req, res, next) => {
 const allowedOrigin = config.frontendUrl.replace(/\/$/, '');
 app.use((req, res, next) => {
   const origin = req.get('origin');
-  if (origin && origin !== allowedOrigin) return res.status(403).json({ error: 'Origin not allowed.' });
+  const requestOrigin = `${req.protocol}://${req.get('host')}`;
+  if (origin && origin !== allowedOrigin && origin !== requestOrigin) return res.status(403).json({ error: 'Origin not allowed.' });
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
@@ -742,6 +753,17 @@ app.get('/api/admin/contacts', asyncRoute(async (_req, res) => {
   const result = await query('SELECT id, name, email, message, created_at FROM contact_submissions ORDER BY created_at DESC LIMIT 100');
   res.json({ submissions: result.rows });
 }));
+
+if (config.production) {
+  const frontendDist = fileURLToPath(new URL('../../frontend/dist/', import.meta.url));
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.path === '/api' || req.path.startsWith('/api/')) return next();
+    res.sendFile(resolve(frontendDist, 'index.html'), (error) => {
+      if (error) next(error);
+    });
+  });
+}
 
 app.use((req, res) => res.status(404).json({ error: 'Route not found.' }));
 app.use((error, _req, res, _next) => {

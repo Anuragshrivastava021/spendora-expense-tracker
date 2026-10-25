@@ -125,3 +125,10 @@ test('origin policy blocks untrusted browser origins', async () => {
   assert.equal(response.status, 403);
   assert.deepEqual(await response.json(), { error: 'Origin not allowed.' });
 });
+
+test('origin policy permits same-origin app requests', async () => {
+  const response = await fetch(`${origin}/api/health`, { headers: { Origin: origin } });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { status: 'ok' });
+  assert.equal(response.headers.get('access-control-allow-origin'), origin);
+});

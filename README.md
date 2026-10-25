@@ -165,14 +165,25 @@ require a configured PostgreSQL instance and must be verified after setup.
 ## Production notes
 
 Build the frontend using `npm run build`; the static output is in `frontend/dist`.
-Deploy the API and static frontend behind HTTPS, configure exact production
-origins in `FRONTEND_URL` and `VITE_API_URL`, use a least-privilege PostgreSQL
-role, and provide a strong secret from a secrets manager. Run migrations before
-deploying new API versions. Back up the database, monitor SMTP delivery and
-database health, and rotate secrets if exposed. Cookies are marked `Secure` in
-production. The frontend and API should be deployed on the same site so the
-`SameSite=Lax` cookies work reliably.
+Deploy the API and static frontend behind HTTPS. The integrated frontend uses
+the same-origin `/api` path in production; if you host the frontend separately,
+set `VITE_API_URL` and `FRONTEND_URL` to their exact public origins. Use a
+least-privilege PostgreSQL role and provide a strong secret from a secrets
+manager. Run migrations before deploying new API versions. Back up the
+database, monitor SMTP delivery and database health, and rotate secrets if
+exposed. Cookies are marked `Secure` in production.
 
 Additional administrators should be provisioned only from a trusted terminal
 with `npm run create-admin`; the public registration endpoint never accepts or
 assigns an administrator role.
+
+### Render preview
+
+The root `render.yaml` describes a single-origin Render preview: one web service
+serves the built frontend and API, with a fresh PostgreSQL database. Import the
+GitHub repository as a Render Blueprint and review the plan shown by Render
+before creating resources. The preview selects free plans: the web service may
+sleep while idle, and the free database is temporary and unsuitable for storing
+important or long-term financial records. No local database records are copied.
+The generated `SESSION_SECRET` is managed by Render. SMTP and administrator
+setup remain separate; do not add passwords or database URLs to the repository.

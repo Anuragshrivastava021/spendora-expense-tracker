@@ -11,7 +11,7 @@ import {
   Tooltip, XAxis, YAxis,
 } from 'recharts';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:4000/api');
 const palette = ['#8057ec', '#20b486', '#ff9b53', '#4b92ed', '#e76485', '#a7a1b2'];
 const categories = ['Food & dining', 'Transport', 'Shopping', 'Housing', 'Health', 'Entertainment', 'Other'];
 const iconByCategory = {
